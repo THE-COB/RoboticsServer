@@ -1,9 +1,11 @@
 import os
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request, redirect, url_for, send_file
 from werkzeug.utils import secure_filename
+import time
 
+c = str(time.clock())
 UPLOAD_FOLDER = './uploads/'
-ALLOWED_EXTENSIONS = set(['txt', 'java', 'apk'])
+ALLOWED_EXTENSIONS = set(['txt', 'apk'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -26,17 +28,15 @@ def upload_file():
 			print('No selected file')
 			return redirect(request.url)
 		if file and allowed_file(file.filename):
+			os.system("mv uploads/newest.apk uploads/olds/"+c+".apk")
 			filename = secure_filename(file.filename)
-			file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+			file.save(os.path.join(app.config['UPLOAD_FOLDER'], "newest.apk"))
 			return redirect(url_for('upload_file', filename=filename))
 	f = open("index.html")
 	iStr = f.read()
 	f.close()
 	return iStr
 
-@app.route("/get", methods=["GET"])
+@app.route("/get-file")
 def download():
-	f = open("./uploads/*.apk")
-	fStr = f.read()
-	f.close()
-	return fStr
+	return send_file("./uploads/newest.apk", as_attachment=True)
